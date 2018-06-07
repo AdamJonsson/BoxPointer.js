@@ -1,0 +1,57 @@
+/* #region: box-pointer */
+.box-pointer {
+    position: absolute; 
+    z-index: 1;
+    display: inline-block;
+
+    white-space: nowrap;
+    opacity: 1;
+
+    pointer-events:none;
+}
+.box-pointer p {
+    position: relative;
+    z-index: 1;
+    top: 0;
+    left: 0;
+
+    padding: 5px 15px;
+    border-radius: 2px;
+
+    background-color: #ffffff;
+}
+
+.box-pointer .box-pointer-arrow {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+
+    box-sizing: border-box;
+    border: 6px solid black;
+    border-color: transparent transparent #ffffff #ffffff;
+    
+    transform-origin: 0 0;
+    
+    box-shadow: -2px 2px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.box-pointer-top .box-pointer-arrow {
+    transform: rotate(-45deg);
+    bottom: 0px;
+    margin-bottom: -10px;
+}
+.box-pointer-bottom .box-pointer-arrow {
+    transform: rotate(135deg);
+    top: 0px;
+
+}
+.box-pointer-left .box-pointer-arrow {
+    transform: rotate(225deg);
+    right: -10px;
+}
+.box-pointer-right .box-pointer-arrow {
+    transform: rotate(45deg);
+    left: 0px;
+}
+/* #endregion: box-pointer */
