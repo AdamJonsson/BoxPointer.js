@@ -1,6 +1,6 @@
 class BoxPointer {
 
-
+    
     /**
      * @param {Element} elementToPointTo The element to point to.
      * @param {Element} elementBorder The element that is the border for the box pointer.
