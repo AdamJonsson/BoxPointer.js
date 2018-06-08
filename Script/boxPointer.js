@@ -27,12 +27,18 @@ class BoxPointer {
      */
     createBox() {
         this.boxElement.classList.add('box-pointer', 'box-pointer-' + this.pointingAt, '--soft-shadow');
+
+        let overflowControll = document.createElement("div");
+        overflowControll.classList.add("overflow-controll");
+
         this.arrowElement.classList.add("box-pointer-arrow");
         var arrowContainer = document.createElement("div");
         arrowContainer.classList.add("arrow-conatiner");
+
         this.boxElement.innerHTML= "<p></p>";
 
-        this.boxElement.appendChild(this.arrowElement);
+        overflowControll.appendChild(this.arrowElement);
+        this.boxElement.appendChild(overflowControll);
         document.body.appendChild(this.boxElement);
 
         setInterval(function() {
@@ -75,10 +81,13 @@ class BoxPointer {
      */
     showOnHover(element) {
         this.hideBox();
+
         this.boxElement.style.transition = "opacity 0.5s";
+
         element.addEventListener('mouseover', function() {
             this.showBox();
         }.bind(this));
+
         element.addEventListener('mouseleave', function() {
             this.hideBox();
         }.bind(this));
@@ -89,144 +98,108 @@ class BoxPointer {
      * Updates the box position.
      */
     updateBoxPosition() {
-        var boxElementData = new getRelativPosition(this.boxElement.getBoundingClientRect());
-        var elementToPointToData = new getRelativPosition(this.elementToPointTo.getBoundingClientRect());
-        var arrowData = new getRelativPosition(this.arrowElement.getBoundingClientRect());
-        var borderData = new getRelativPosition(this.elementBorder.getBoundingClientRect());
 
-        var alignOffsetY = this.alignOffset * elementToPointToData.height;
-        var alignOffsetX = this.alignOffset * elementToPointToData.width;
+        let boxElementDimensions = new getRelativPosition(this.boxElement.getBoundingClientRect());
+        let elementToPointToDimensions = new getRelativPosition(this.elementToPointTo.getBoundingClientRect());
+        let borderDimensions = new getRelativPosition(this.elementBorder.getBoundingClientRect());
+        let arrowDimensions = new getRelativPosition(this.arrowElement.getBoundingClientRect());
 
-        this.placeBoxAt(this.pointingAt);
+        // Setting the main position for the box.
+        var rawBoxYPos = this.getRawBoxYPosition(boxElementDimensions, elementToPointToDimensions);
+        var boxYPos = this.getBoxYPositionAfterCheckingBorder(rawBoxYPos, boxElementDimensions, borderDimensions); 
 
+        var rawBoxXPos = this.getRawBoxXPosition(boxElementDimensions, elementToPointToDimensions);
+        var boxXPos = this.getBoxXPositionAfterCheckingBorder(rawBoxXPos, boxElementDimensions, borderDimensions);
+
+        // Setting the offset depeding how the box should be pointed.
         switch (this.pointingAt) {
             case "top": 
-                var arrowOffsetX = -arrowData.width/2 + boxElementData.width/2;
-                break;
-            case "left":
-                var arrowOffsetY = Math.round(arrowData.height/2 + (boxElementData.height/2));
-                break;
-            case "right":
-                var arrowOffsetY = Math.round(-arrowData.height/2 + (boxElementData.height/2));
+                boxYPos = Math.floor(elementToPointToDimensions.yPos - (boxElementDimensions.height + 10));
+                var arrowOffsetX = Math.floor(-arrowDimensions.width/2 + boxElementDimensions.width/2 + (rawBoxXPos - boxXPos));
                 break;
             case "bottom":
-                var arrowOffsetX = arrowData.width/2 + boxElementData.width/2;
+                boxYPos = Math.floor(elementToPointToDimensions.yPos + elementToPointToDimensions.height + 10);
+                var arrowOffsetX = Math.floor(arrowDimensions.width/2 + boxElementDimensions.width/2 + (rawBoxXPos - boxXPos));
+                break;
+            case "left":
+                boxXPos = Math.floor(elementToPointToDimensions.xPos -(boxElementDimensions.width + 10));
+                var arrowOffsetY = Math.round(arrowDimensions.height/2 + (boxElementDimensions.height/2) + (rawBoxYPos - boxYPos));
+                break;
+            case "right":
+                boxXPos = Math.floor(elementToPointToDimensions.xPos + 10 + elementToPointToDimensions.width);
+                var arrowOffsetY = Math.round(-arrowDimensions.height/2 + (boxElementDimensions.height/2) + (rawBoxYPos - boxYPos));
                 break;
         }
 
-        //Setting the pointer on the left or right side and checking border.
-        if(this.pointingAt == "left" || this.pointingAt == "right") {
-            var newBoxPosition = Math.floor(elementToPointToData.yPos - boxElementData.height/2 + alignOffsetY);
+        //Setting the new positions to the box element.
+        this.boxElement.style.top = boxYPos + "px";
+        this.boxElement.style.left = boxXPos + "px";
 
-            if(newBoxPosition < borderData.yPos) {
-                //Setting the arrow pos
-                var newArrowPos = (newBoxPosition - borderData.yPos) + arrowOffsetY;
-                if(newArrowPos < 0) newArrowPos = 0;
-                this.arrowElement.style.top = newArrowPos + "px";
-
-                //Gettinhg the new box pos
-                newBoxPosition = borderData.yPos;
-            }
-            else if(newBoxPosition + boxElementData.height > borderData.yPos + borderData.height) {
-                //Setting the arrow pos
-                var newArrowPos = (newBoxPosition - borderData.yPos - borderData.height) + arrowOffsetY + boxElementData.height;
-                if(newArrowPos > boxElementData.height) newArrowPos = boxElementData.height;
-                this.arrowElement.style.top = newArrowPos + "px";
-
-                //Getting the newbox pos.
-                newBoxPosition = borderData.yPos + borderData.height - boxElementData.height;
-            }
-            else {
-                this.arrowElement.style.top = Math.round(arrowOffsetY) + "px";
-            }
-
-            this.boxElement.style.top = newBoxPosition + "px";
-        }
-
-        //Setting the pointer on the top or bottom side and checking border.
-        else if(this.pointingAt == "top" || this.pointingAt == "bottom") {
-            var newBoxPosition = Math.floor(elementToPointToData.xPos - boxElementData.width/2 + alignOffsetX);
-
-            if(newBoxPosition < borderData.xPos) {
-                //Setting the arrow pos
-                var newArrowPos = (newBoxPosition - borderData.xPos) + arrowOffsetX;
-                if(newArrowPos < 0) newArrowPos = 0;
-                this.arrowElement.style.left = newArrowPos + "px";
-
-                //Gettinhg the new box pos
-                newBoxPosition = borderData.xPos;
-            }
-            else if(newBoxPosition + boxElementData.width > borderData.xPos + borderData.width) {
-                //Setting the arrow pos
-                var newArrowPos = (newBoxPosition - borderData.xPos - borderData.width) + arrowOffsetX + boxElementData.width;
-                if(newArrowPos > boxElementData.width) newArrowPos = boxElementData.width;
-                this.arrowElement.style.left = newArrowPos + "px";
-
-                //Getting the newbox pos.
-                newBoxPosition = borderData.xPos + borderData.width - boxElementData.width;
-            }
-            else {
-                this.arrowElement.style.left = Math.round(arrowOffsetX) + "px";
-            }
-            
-            this.boxElement.style.left = (newBoxPosition) +  "px";
-        }
+        //Setting the positions for the arrow.
+        this.arrowElement.style.top = arrowOffsetY + "px";
+        this.arrowElement.style.left = arrowOffsetX + "px";
 
     }
 
 
     /**
-     * This functions puts the box at a choosen position of an element.
-     * @param {String} sideToPointAt The position to point at.
+     * Getting the raw y-posiiont for the box without checking if the position is outside the border element.
+     * @param {getRelativPosition} boxElementDimensions The box dimensions
+     * @param {getRelativPosition} elementToPointToDimensions The dimensions of the element that the box is going to point at
      */
-    placeBoxAt(sideToPointAt = "left" | "right" | "top" | "bottom") {
-
-        let boxElementData = new getRelativPosition(this.boxElement.getBoundingClientRect());
-        let elementToPointToData = new getRelativPosition(this.elementToPointTo.getBoundingClientRect());
-
-        var newElementYPos = "auto";
-        var newElementXPos = "auto";
-
-        switch (sideToPointAt) {
-            case "top": 
-                newElementYPos = Math.floor(elementToPointToData.yPos - (boxElementData.height + 10)) + "px";
-                break;
-            case "bottom":
-                newElementYPos = Math.floor(elementToPointToData.yPos + elementToPointToData.height + 10) + "px";
-                break;
-            case "left":
-                newElementXPos = Math.floor(elementToPointToData.xPos -(boxElementData.width + 10)) + "px";
-                break;
-            case "right":
-                newElementXPos = Math.floor(elementToPointToData.xPos + 10 + elementToPointToData.width) + "px";
-                break;
-        }
-
-        this.boxElement.style.top = newElementYPos;
-        this.boxElement.style.left = newElementXPos;
+    getRawBoxYPosition(boxElementDimensions, elementToPointToDimensions) {
+        let yPos = elementToPointToDimensions.yPos + this.alignOffset * elementToPointToDimensions.height - boxElementDimensions.height/2;
+        return Math.floor(yPos);
     }
 
 
     /**
-     * Checks if the new box position is outside the border.
-     * @param {Number} newBoxPosition The new box position. 
+     * Getting the main y-position for the box after chekcing the border.
+     * @param {Number} rawYPos The raw y-position for the box.
+     * @param {getRelativPosition} boxElementDimensions The box dimensions
+     * @param {getRelativPosition} borderDimensions The dimensions of the border element.
+     * @return {Int} The y-position for the box.
      */
-    _positionOutsideBorder(sideToPointAt, newBoxPosition) {
-        let borderDimensions = new getRelativPosition(this.elementBorder.getBoundingClientRect());
-        
-        switch (sideToPointAt) {
-            case "top": 
-                if(newBoxPosition > borderDimensions.yPos) return true;
-                break;
-            case "bottom":
-                if(newBoxPosition < borderDimensions.xPos + borderDimensions.height) return true;
-                break;
-            case "left":
-                newElementXPos = Math.floor(elementToPointToData.xPos -(boxElementData.width + 10)) + "px";
-                break;
-            case "right":
-                newElementXPos = Math.floor(elementToPointToData.xPos + 10 + elementToPointToData.width) + "px";
-                break;
+    getBoxYPositionAfterCheckingBorder(rawYPos, boxElementDimensions, borderDimensions) {
+
+        if(rawYPos < borderDimensions.yPos) {
+            return borderDimensions.yPos;
         }
+        else if(rawYPos + boxElementDimensions.height > borderDimensions.yPos + borderDimensions.height) {
+            return borderDimensions.yPos + borderDimensions.height - boxElementDimensions.height;
+        }
+
+        return rawYPos;
+    }
+
+
+    /**
+     * Getting the raw x-posiiont for the box without checking if the position is outside the border element.
+     * @param {getRelativPosition} boxElementDimensions The box dimensions
+     * @param {getRelativPosition} elementToPointToDimensions The dimensions of the element that the box is going to point at
+     */
+    getRawBoxXPosition(boxElementDimensions, elementToPointToDimensions) {
+        let xPos = elementToPointToDimensions.xPos + this.alignOffset * elementToPointToDimensions.width - boxElementDimensions.width/2
+        return Math.floor(xPos);
+    }
+
+
+    /**
+     * Getting the main x-position for the box after chekcing the border.
+     * @param {Number} rawXPos The raw x-position for the box.
+     * @param {getRelativPosition} boxElementDimensions The box dimensions
+     * @param {getRelativPosition} borderDimensions The dimensions of the border element.
+     * @return {Int} The x-position for the box.
+     */
+    getBoxXPositionAfterCheckingBorder(rawXPos, boxElementDimensions, borderDimensions) {
+
+        if(rawXPos < borderDimensions.xPos) {
+            return borderDimensions.xPos;
+        }
+        else if(rawXPos + boxElementDimensions.width > borderDimensions.xPos + borderDimensions.width) {
+            return borderDimensions.xPos + borderDimensions.width - boxElementDimensions.width;
+        }
+
+        return rawXPos;
     }
 }

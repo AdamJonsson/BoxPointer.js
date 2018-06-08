@@ -36,22 +36,46 @@
     box-shadow: -2px 2px 3px 0 rgba(0, 0, 0, 0.05);
 }
 
+.box-pointer .overflow-controll{
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    height: 100%;
+    width: 100%;
+
+    overflow: hidden;
+}
+
 .box-pointer-top .box-pointer-arrow {
     transform: rotate(-45deg);
     bottom: 0px;
-    margin-bottom: -10px;
 }
+.box-pointer-top .overflow-controll {
+    top: 10px;
+}
+
 .box-pointer-bottom .box-pointer-arrow {
     transform: rotate(135deg);
-    top: 0px;
-
+    top: 10px;
 }
+.box-pointer-bottom .overflow-controll {
+    top: -10px;
+}
+
 .box-pointer-left .box-pointer-arrow {
     transform: rotate(225deg);
-    right: -10px;
+    right: 0;
 }
+.box-pointer-left .overflow-controll {
+    left: 10px;
+}
+
 .box-pointer-right .box-pointer-arrow {
     transform: rotate(45deg);
-    left: 0px;
+    left: 10px;
+}
+.box-pointer-right .overflow-controll {
+    left: -10px;
 }
 /* #endregion: box-pointer */
