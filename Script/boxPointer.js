@@ -1,3 +1,5 @@
+//@ts-check
+
 class BoxPointer {
 
     
@@ -5,7 +7,7 @@ class BoxPointer {
      * @param {Element} elementToPointTo The element to point to.
      * @param {Element} elementBorder The element that is the border for the box pointer.
      * @param {string} pointingAt How to point at the box. "right" | "top" | "left" | "bottom".
-     * @param {Int} alignOffset The percent of height or width as offset. 0% - 100%
+     * @param {Number} alignOffset The percent of height or width as offset. 0% - 100%
      */
     constructor(elementToPointTo, elementBorder, pointingAt, alignOffset) {
         this.boxElement = document.createElement("div");
@@ -48,11 +50,11 @@ class BoxPointer {
 
 
     /**
-     * Updates the box text.
-     * @param {String} text 
+     * Sets a new text in the box.
+     * @param {String} newText The new text in the box.
      */
-    updateBoxText(text) {
-        this.currentText = text;
+    updateBoxText(newText) {
+        this.currentText = newText;
         this.boxElement.getElementsByTagName("p")[0].innerHTML = this.currentText;
 
         this.updateBoxPosition();
@@ -63,7 +65,7 @@ class BoxPointer {
      * Hiding the box
      */
     hideBox() {
-        this.boxElement.style.opacity = 0;
+        this.boxElement.style.opacity = "0";
     }
 
 
@@ -71,7 +73,7 @@ class BoxPointer {
      * Showing the box
      */
     showBox() {
-        this.boxElement.style.opacity = 1;
+        this.boxElement.style.opacity = "1";
     }
 
 
@@ -79,9 +81,8 @@ class BoxPointer {
      * Showing the box when hovering over a element.
      * @param {Element} element Showing the box when hovering over this element.
      */
-    showOnHover(element) {
+    showOnHover(element = this.elementToPointTo) {
         this.hideBox();
-
         this.boxElement.style.transition = "opacity 0.5s";
 
         element.addEventListener('mouseover', function() {
@@ -158,7 +159,7 @@ class BoxPointer {
      * @param {Number} rawYPos The raw y-position for the box.
      * @param {getRelativPosition} boxElementDimensions The box dimensions
      * @param {getRelativPosition} borderDimensions The dimensions of the border element.
-     * @return {Int} The y-position for the box.
+     * @return {Number} The y-position for the box.
      */
     getBoxYPositionAfterCheckingBorder(rawYPos, boxElementDimensions, borderDimensions) {
 
@@ -189,7 +190,7 @@ class BoxPointer {
      * @param {Number} rawXPos The raw x-position for the box.
      * @param {getRelativPosition} boxElementDimensions The box dimensions
      * @param {getRelativPosition} borderDimensions The dimensions of the border element.
-     * @return {Int} The x-position for the box.
+     * @return {Number} The x-position for the box.
      */
     getBoxXPositionAfterCheckingBorder(rawXPos, boxElementDimensions, borderDimensions) {
 
@@ -203,3 +204,18 @@ class BoxPointer {
         return rawXPos;
     }
 }
+
+
+/**
+ * This returns the relativ position for an element. 
+ * @param {Object} elementData 
+ */
+function getRelativPosition(elementData) {
+    var bodyData = document.body.getBoundingClientRect();
+
+    this.xPos = elementData.left - bodyData.left;
+    this.yPos = elementData.top - bodyData.top;
+    this.width = elementData.width;
+    this.height = elementData.height;
+}
+
