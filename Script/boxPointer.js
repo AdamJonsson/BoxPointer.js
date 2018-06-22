@@ -8,8 +8,9 @@ class BoxPointer {
      * @param {Element} elementBorder The element that is the border for the box pointer. If border is not needed, null works
      * @param {string} pointingAt How to point at the box. "right" | "top" | "left" | "bottom".
      * @param {Number} alignOffset The percent of height or width as offset. 0% - 100%
+     * @param {Boolean} movingElement If the element to point is moving or chaning size.
      */
-    constructor(elementToPointTo, elementBorder, pointingAt, alignOffset) {
+    constructor(elementToPointTo, elementBorder, pointingAt, alignOffset, movingElement = false) {
         this.boxElement = document.createElement("div");
         this.arrowElement = document.createElement("div");
 
@@ -19,6 +20,7 @@ class BoxPointer {
         this.pointingAt = pointingAt;
         this.alignOffset = alignOffset/100;
         this.currentText = "No Data";
+        this.movingElement = movingElement;
         
         this.createBox();
     }
@@ -43,9 +45,14 @@ class BoxPointer {
         this.boxElement.appendChild(overflowControll);
         document.body.appendChild(this.boxElement);
 
-        setInterval(function() {
-            this.updateBoxPosition();
-        }.bind(this), 5);
+        if(this.movingElement) {
+            setInterval(function() {
+                this.updateBoxPosition();
+            }.bind(this), 5);
+        }
+        else {
+            window.addEventListener("resize", this.updateBoxPosition.bind(this));
+        }
     }
 
 
