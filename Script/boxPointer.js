@@ -52,6 +52,9 @@ class BoxPointer {
         }
         else {
             window.addEventListener("resize", this.updateBoxPosition.bind(this));
+            setTimeout(function() {
+                this.updateBoxPosition();
+            }.bind(this), 500);
         }
     }
 
