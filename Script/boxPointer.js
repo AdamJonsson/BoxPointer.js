@@ -5,7 +5,7 @@ class BoxPointer {
     
     /**
      * @param {Element} elementToPointTo The element to point to.
-     * @param {Element} elementBorder The element that is the border for the box pointer.
+     * @param {Element} elementBorder The element that is the border for the box pointer. If border is not needed, null works
      * @param {string} pointingAt How to point at the box. "right" | "top" | "left" | "bottom".
      * @param {Number} alignOffset The percent of height or width as offset. 0% - 100%
      */
@@ -102,15 +102,21 @@ class BoxPointer {
 
         let boxElementDimensions = new getRelativPosition(this.boxElement.getBoundingClientRect());
         let elementToPointToDimensions = new getRelativPosition(this.elementToPointTo.getBoundingClientRect());
-        let borderDimensions = new getRelativPosition(this.elementBorder.getBoundingClientRect());
         let arrowDimensions = new getRelativPosition(this.arrowElement.getBoundingClientRect());
 
         // Setting the main position for the box.
         var rawBoxYPos = this.getRawBoxYPosition(boxElementDimensions, elementToPointToDimensions);
-        var boxYPos = this.getBoxYPositionAfterCheckingBorder(rawBoxYPos, boxElementDimensions, borderDimensions); 
-
         var rawBoxXPos = this.getRawBoxXPosition(boxElementDimensions, elementToPointToDimensions);
-        var boxXPos = this.getBoxXPositionAfterCheckingBorder(rawBoxXPos, boxElementDimensions, borderDimensions);
+
+        if(this.elementBorder) {
+            let borderDimensions = new getRelativPosition(this.elementBorder.getBoundingClientRect());
+            var boxYPos = this.getBoxYPositionAfterCheckingBorder(rawBoxYPos, boxElementDimensions, borderDimensions);
+            var boxXPos = this.getBoxXPositionAfterCheckingBorder(rawBoxXPos, boxElementDimensions, borderDimensions); 
+        }
+        else {
+            var boxYPos = rawBoxYPos;
+            var boxXPos = rawBoxXPos;
+        }
 
         // Setting the offset depeding how the box should be pointed.
         switch (this.pointingAt) {
